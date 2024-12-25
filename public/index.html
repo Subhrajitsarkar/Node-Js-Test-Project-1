@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management</title>
+    <style>
+        .book-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .book-card h3 {
+            margin: 0;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Library Management Project</h1>
+        <form id="addBookForm">
+            <label for="bookName">Enter Book Name:</label>
+            <input type="text" id="bookName" placeholder="Book Name" required>
+            <button type="submit">Submit</button>
+        </form>
+
+        <h2>Books</h2>
+        <div id="booksContainer"></div>
+
+        <h2>Returned Books</h2>
+        <div id="returnedBooksContainer"></div>
+    </div>
+
+    <script>
+        document.getElementById('addBookForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const bookName = document.getElementById('bookName').value;
+
+            const book = {
+                name: bookName,
+                takenOn: new Date(),
+                returnDue: new Date(Date.now() + 60 * 60 * 1000), // 1 hour from now
+            };
+
+            try {
+                await axios.post('http://localhost:3000/api/books', book);
+                document.getElementById('bookName').value = '';
+                fetchBooks();
+            } catch (error) {
+                console.error('Error adding book:', error);
+            }
+        });
+
+        async function fetchBooks() {
+            try {
+                const booksResponse = await axios.get('http://localhost:3000/api/books');
+                const returnedBooksResponse = await axios.get('http://localhost:3000/api/returned-books');
+
+                renderBooks(booksResponse.data, 'booksContainer', true);
+                renderBooks(returnedBooksResponse.data, 'returnedBooksContainer', false);
+            } catch (error) {
+                console.error('Error fetching books:', error);
+            }
+        }
+
+        function renderBooks(books, containerId, isActive) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            books.forEach((book) => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.innerHTML = `
+                    <h3>${book.name}</h3>
+                    <p>Book taken on: ${new Date(book.takenOn).toLocaleString()}</p>
+                    <p>Return due by: ${new Date(book.returnDue).toLocaleString()}</p>
+                    <p>Fine: ₹${book.fine}</p>
+                    ${isActive ? `<button onclick="returnBook(${book.id})">Return Book</button>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function returnBook(bookId) {
+            try {
+                await axios.put(`http://localhost:3000/api/books/${bookId}`);
+                fetchBooks();
+            } catch (error) {
+                console.error('Error returning book:', error);
+            }
+        }
+
+        // Initial fetch
+        fetchBooks();
+    </script>
+</body>
+
+</html>
