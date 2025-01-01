@@ -29,13 +29,12 @@
             background-color: #0056b3;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
     <div class="container">
         <h1>Library Management Project</h1>
-        <form id="addBookForm">
+        <form id="addBookForm" onsubmit="handleFormSubmit(event)">
             <label for="bookName">Enter Book Name:</label>
             <input type="text" id="bookName" placeholder="Book Name" required>
             <button type="submit">Submit</button>
@@ -48,15 +47,17 @@
         <div id="returnedBooksContainer"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
     <script>
-        document.getElementById('addBookForm').addEventListener('submit', async (event) => {
+        async function handleFormSubmit(event) {
             event.preventDefault();
             const bookName = document.getElementById('bookName').value;
 
             const book = {
                 name: bookName,
                 takenOn: new Date(),
-                returnDue: new Date(Date.now() + 60 * 60 * 1000), // 1 hour from now
+                returnDue: new Date(Date.now() + 60 * 60 * 1000),
             };
 
             try {
@@ -66,7 +67,7 @@
             } catch (error) {
                 console.error('Error adding book:', error);
             }
-        });
+        }
 
         async function fetchBooks() {
             try {
@@ -106,8 +107,6 @@
                 console.error('Error returning book:', error);
             }
         }
-
-        // Initial fetch
         fetchBooks();
     </script>
 </body>

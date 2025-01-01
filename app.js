@@ -12,9 +12,8 @@ app.use(express.static('public'));
 
 app.use('/api', bookRoutes);
 
-// Start Server
 sequelize.sync()
     .then(() => {
-        app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+        app.listen(3000, () => console.log('Server running on 3000'));
     })
     .catch((error) => console.error('Error syncing database:', error));
